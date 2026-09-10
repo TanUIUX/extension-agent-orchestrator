@@ -1,0 +1,215 @@
+{
+  "name": "ao-vscode",
+  "displayName": "Agent Orchestrator",
+  "description": "Supervise parallel coding-agent workspaces from inside VS Code.",
+  "version": "0.1.0",
+  "publisher": "tanuiux",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "main": "./dist/extension.js",
+  "categories": [
+    "Other"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "ao.openBoard",
+        "title": "AO: Open Board",
+        "icon": "$(layout)"
+      },
+      {
+        "command": "ao.newTask",
+        "title": "AO: New Task",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ao.daemon.restart",
+        "title": "AO: Restart Daemon"
+      },
+      {
+        "command": "ao.daemon.showLogs",
+        "title": "AO: Show Daemon Status"
+      },
+      {
+        "command": "ao.projects.add",
+        "title": "AO: Register Project\u2026",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ao.projects.remove",
+        "title": "AO: Remove Project\u2026",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "ao.projects.refresh",
+        "title": "AO: Refresh Projects",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ao.sessions.spawn",
+        "title": "AO: Spawn Worker\u2026",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ao.sessions.kill",
+        "title": "AO: Kill Worker\u2026",
+        "icon": "$(stop-circle)"
+      },
+      {
+        "command": "ao.sessions.openWorker",
+        "title": "AO: Open Worker"
+      },
+      {
+        "command": "ao.sessions.openTerminal",
+        "title": "AO: Open Worker Terminal",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "ao.sessions.openFiles",
+        "title": "AO: Open Worker Changes",
+        "icon": "$(diff)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ao",
+          "title": "Agent Orchestrator",
+          "icon": "media/ao-activitybar.svg"
+        }
+      ]
+    },
+    "views": {
+      "ao": [
+        {
+          "id": "ao.projects",
+          "name": "Projects",
+          "icon": "media/ao-activitybar.svg"
+        },
+        {
+          "id": "ao.workers",
+          "name": "Workers",
+          "icon": "media/ao-activitybar.svg"
+        },
+        {
+          "id": "ao.notifications",
+          "name": "Needs attention",
+          "icon": "media/ao-activitybar.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "ao.projects.add",
+          "when": "view == ao.projects",
+          "group": "navigation"
+        },
+        {
+          "command": "ao.projects.refresh",
+          "when": "view == ao.projects",
+          "group": "navigation"
+        },
+        {
+          "command": "ao.openBoard",
+          "when": "view == ao.projects",
+          "group": "navigation"
+        },
+        {
+          "command": "ao.newTask",
+          "when": "view == ao.workers",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ao.projects.remove",
+          "when": "view == ao.projects && viewItem == ao.project",
+          "group": "inline"
+        },
+        {
+          "command": "ao.sessions.spawn",
+          "when": "view == ao.projects && viewItem == ao.project",
+          "group": "inline"
+        },
+        {
+          "command": "ao.sessions.openWorker",
+          "when": "view == ao.workers && viewItem =~ /^ao.session/",
+          "group": "inline"
+        },
+        {
+          "command": "ao.sessions.openTerminal",
+          "when": "view == ao.workers && viewItem == ao.session.active",
+          "group": "inline"
+        },
+        {
+          "command": "ao.sessions.kill",
+          "when": "view == ao.workers && viewItem == ao.session.active",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Agent Orchestrator",
+      "properties": {
+        "ao.daemon.executablePath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the ao daemon binary. Empty uses the installed AO desktop daemon."
+        },
+        "ao.daemon.dataDir": {
+          "type": "string",
+          "default": "",
+          "description": "Override AO_DATA_DIR. Empty uses ~/.ao/data."
+        },
+        "ao.daemon.allowAttachExisting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Attach to an already-running AO daemon."
+        },
+        "ao.files.autoReveal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Reveal changed worker files in the Explorer when opening a worker."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "npm run build:webview && npm run bundle:check && npm run build:extension",
+    "build:extension": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node20 --external:vscode --outfile=dist/extension.js",
+    "vscode:prepublish": "npm run build",
+    "test": "node scripts/build-tests.mjs && node --test test/*.test.mjs",
+    "build:webview": "node scripts/build-webview.mjs",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.webview.json --noEmit",
+    "lint": "tsc --noEmit",
+    "package": "npm run build && vsce package --no-dependencies",
+    "bundle:check": "node scripts/check-bundle.mjs"
+  },
+  "dependencies": {
+    "@aoagents/product-ui": "file:vendor/agent-orchestrator/packages/product-ui",
+    "openapi-fetch": "^0.17.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/vscode": "^1.95.0",
+    "@types/ws": "^8.18.1",
+    "@vscode/vsce": "^3.2.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TanUIUX/extension-agent-orchestrator.git"
+  }
+}

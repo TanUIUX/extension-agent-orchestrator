@@ -1,0 +1,14 @@
+**/.git/**
+**/.github/**
+**/node_modules/**
+vendor/**
+src/**
+webview/**
+test/**
+scripts/**
+.impeccable/**
+*.ts
+*.tsx
+*.map
+package-lock.json
+tsconfig*.json
